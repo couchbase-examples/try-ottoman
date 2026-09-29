@@ -249,6 +249,7 @@ paths:
         default: 0
       - name: "search"
         in: "query"
+        description: "Case-insensitive text to match anywhere in the hotel name"
         required: false
         type: "string"
       responses:

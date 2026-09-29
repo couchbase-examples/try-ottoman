@@ -13,7 +13,8 @@ router.get('/', async (req, res) => {
       // A stable order keeps limit/skip pages from overlapping.
       sort: { name: 'ASC', id: 'ASC' },
     });
-    const filter = req.query.search ? { name: { $like: `%${req.query.search}%` } } : {};
+    // $ignoreCase only lowercases the name match, so the rest of the query can still use indexes.
+    const filter = req.query.search ? { name: { $like: `%${req.query.search}%`, $ignoreCase: true } } : {};
     const result = await HotelModel.find(filter, options);
     const { rows: items } = result;
     return {

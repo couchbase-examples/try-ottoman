@@ -27,6 +27,11 @@ describe('/hotels', () => {
       expect(res.body.items).toEqual([expect.objectContaining({ name: 'Medway Youth Hostel' })]);
     });
 
+    it('matches the name case-insensitively', async () => {
+      const res = await api.get('/hotels').query({ search: 'mEDWAY' }).expect(200);
+      expect(res.body.items).toEqual([expect.objectContaining({ name: 'Medway Youth Hostel' })]);
+    });
+
     it('honors limit', async () => {
       const res = await api.get('/hotels').query({ limit: 5 }).expect(200);
       expect(res.body.items).toHaveLength(5);
