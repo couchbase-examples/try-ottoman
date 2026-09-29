@@ -8,6 +8,8 @@ const validHotel = {
   country: 'United States',
 };
 
+// `_validate` is Ottoman's internal validation step (run by `save()`). It's used here to test the
+// schema without a database connection, so it may need updating when Ottoman is upgraded.
 const validate = (data) => new HotelModel(data)._validate();
 
 describe('HotelModel validation', () => {
@@ -34,6 +36,11 @@ describe('HotelModel validation', () => {
   });
 
   it('rejects review ratings outside 1-5', () => {
-    expect(() => validate({ ...validHotel, reviews: [{ ratings: { Overall: 6 } }] })).toThrow();
+    expect(() => validate({ ...validHotel, reviews: [{ ratings: { Overall: 6 } }] })).toThrow(
+      "Property 'Overall' is more than the maximum allowed value of '5'",
+    );
+    expect(() => validate({ ...validHotel, reviews: [{ ratings: { Overall: 0 } }] })).toThrow(
+      "Property 'Overall' is less than the minimum allowed value of '1'",
+    );
   });
 });

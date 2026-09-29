@@ -58,9 +58,12 @@ The quickest way to get a cluster for the tests is the bundled script. It starts
 yarn couchbase:start   # safe to re-run; skips steps that are already done
 yarn test              # all unit + integration tests
 yarn test:unit         # unit tests only, no Couchbase needed
+yarn test:integration  # integration tests only
 ```
 
-The tests read the same `DB_*` variables as the app, so you can also point them at your own cluster.
+The tests read the same `DB_*` variables as the app (including from `.env`), so you can also point them at your own cluster.
+
+> **Heads up:** the integration tests write to whichever cluster the `DB_*` variables point at. They create, update and delete test documents (named `Test ...`) in the `travel-sample` `inventory` collections, and like `yarn start` they create the model indexes if they are missing. Use a disposable cluster such as the Docker one above rather than one with data you care about.
 
 The [Tests workflow](.github/workflows/tests.yml) runs the unit tests and integration tests (against the same Docker setup) on every pull request and on pushes to `master`.
 
@@ -99,7 +102,8 @@ Next, a custom validator function is defined to make sure that a phone number in
 addValidators({
   phone: (value) => {
     const regex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    if (value && !value.match(regex)) {
+    // Ottoman passes missing strings to validators as the string 'undefined'.
+    if (value && value !== 'undefined' && !value.match(regex)) {
       throw new Error('Phone number is invalid.');
     }
   },
@@ -343,3 +347,9 @@ module.exports = { createApp };
 After running `yarn start`,  Once you have the example running, you can find all definitions in Swagger:
 
 ```http://localhost:4500/api-docs/```
+
+A few conventions apply across the API:
+
+- The list endpoints (`GET /hotels`, `GET /airports`, `GET /flightPaths`) take `limit` (default `50`) and `skip` (default `0`) for paging. Results are sorted by name so pages don't overlap.
+- `GET /flightPaths` requires `from` and `to` airport ids (e.g. `airport_3469`) and takes an optional `weekDay` (`0`-`6`).
+- Errors are returned as `{ "message": "..." }`, with status `400` for invalid input, `404` when a document isn't found and `500` otherwise.

@@ -34,12 +34,18 @@ paths:
         schema:
           $ref: "#/definitions/Airport"
       responses:
+        "201":
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Airport"
         "400":
           description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
       - "airport"
-      summary: "List of airports"
+      summary: "List of airports, sorted by name"
       description: ""
       operationId: "listAirport"
       produces:
@@ -47,12 +53,18 @@ paths:
       parameters:
       - name: "limit"
         in: "query"
+        description: "Maximum number of results to return"
         required: false
-        type: "number"
+        type: "integer"
+        minimum: 1
+        default: 50
       - name: "skip"
         in: "query"
+        description: "Number of results to skip, for paging"
         required: false
-        type: "number"
+        type: "integer"
+        minimum: 0
+        default: 0
       - name: "search"
         in: "query"
         required: false
@@ -63,7 +75,9 @@ paths:
           schema:
             $ref: "#/definitions/ListAirportsResponse"
         "400":
-          description: "Invalid username/password supplied"
+          description: "Invalid query parameter"
+          schema:
+            $ref: "#/definitions/Error"
   /airports/{id}:
     put:
       tags:
@@ -81,7 +95,6 @@ paths:
         description: "ID of the airport to be replaced"
         required: true
         type: "string"
-        format: "uuid"
       - in: "body"
         name: "body"
         description: "Airport object that should be replaced"
@@ -89,12 +102,20 @@ paths:
         schema:
           $ref: "#/definitions/Airport"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     patch:
       tags:
       - "airport"
@@ -111,7 +132,6 @@ paths:
         description: "ID of the airport to be replaced"
         required: true
         type: "string"
-        format: "uuid"
       - in: "body"
         name: "body"
         description: "Airport object that should be replaced"
@@ -119,12 +139,20 @@ paths:
         schema:
           $ref: "#/definitions/Airport"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
       - "airport"
@@ -139,7 +167,6 @@ paths:
         description: "ID of the airport be to returned"
         required: true
         type: "string"
-        format: "uuid"
       responses:
         "200":
           description: "Operation completed successfully"
@@ -147,6 +174,8 @@ paths:
             $ref: "#/definitions/Airport"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
     delete:
       tags:
       - "airport"
@@ -161,10 +190,13 @@ paths:
         description: "Airport id to be deleted"
         required: true
         type: "string"
-        format: "uuid"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
   /hotels:
     post:
       tags:
@@ -184,12 +216,18 @@ paths:
           schema:
             $ref: "#/definitions/Hotel"
       responses:
+        "201":
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Hotel"
         "400":
           description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
         - "hotels"
-      summary: "List of hotels"
+      summary: "List of hotels, sorted by name"
       description: ""
       operationId: "listHotel"
       produces:
@@ -197,12 +235,18 @@ paths:
       parameters:
       - name: "limit"
         in: "query"
+        description: "Maximum number of results to return"
         required: false
-        type: "number"
+        type: "integer"
+        minimum: 1
+        default: 50
       - name: "skip"
         in: "query"
+        description: "Number of results to skip, for paging"
         required: false
-        type: "number"
+        type: "integer"
+        minimum: 0
+        default: 0
       - name: "search"
         in: "query"
         required: false
@@ -213,7 +257,9 @@ paths:
           schema:
             $ref: "#/definitions/ListHotelsResponse"
         "400":
-          description: "Invalid username/password supplied"
+          description: "Invalid query parameter"
+          schema:
+            $ref: "#/definitions/Error"
   /hotels/{id}:
     put:
       tags:
@@ -231,7 +277,6 @@ paths:
         description: "ID of the hotel to be replaced"
         required: true
         type: "string"
-        format: "uuid"
       - in: "body"
         name: "body"
         description: "Hotel object that should to be replaced"
@@ -239,12 +284,20 @@ paths:
         schema:
           $ref: "#/definitions/Hotel"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     patch:
       tags:
         - "hotels"
@@ -261,7 +314,6 @@ paths:
           description: "ID of the hotel to be replaced"
           required: true
           type: "string"
-          format: "uuid"
         - in: "body"
           name: "body"
           description: "Hotel object that should to be replaced"
@@ -269,12 +321,20 @@ paths:
           schema:
             $ref: "#/definitions/Hotel"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
         - "hotels"
@@ -296,6 +356,8 @@ paths:
             $ref: "#/definitions/Hotel"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
     delete:
       tags:
         - "hotels"
@@ -310,10 +372,13 @@ paths:
           description: "Hotel id to be deleted"
           required: true
           type: "string"
-          format: "uuid"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
   /flightPaths:
     post:
       tags:
@@ -333,12 +398,18 @@ paths:
           schema:
             $ref: "#/definitions/Route"
       responses:
+        "201":
+          description: "Created"
+          schema:
+            $ref: "#/definitions/Route"
         "400":
           description: "Invalid input"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
         - "flights"
-      summary: "List of flight paths"
+      summary: "List of flights between two airports, sorted by airline name"
       description: ""
       operationId: "listFlights"
       produces:
@@ -346,27 +417,48 @@ paths:
       parameters:
         - name: "limit"
           in: "query"
+          description: "Maximum number of results to return"
           required: false
-          type: "number"
+          type: "integer"
+          minimum: 1
+          default: 50
         - name: "skip"
           in: "query"
+          description: "Number of results to skip, for paging"
           required: false
-          type: "number"
+          type: "integer"
+          minimum: 0
+          default: 0
         - name: "from"
           in: "query"
+          description: "ID of the departure airport, e.g. airport_3469"
           required: true
           type: "string"
         - name: "to"
           in: "query"
+          description: "ID of the arrival airport, e.g. airport_3484"
           required: true
           type: "string"
+        - name: "weekDay"
+          in: "query"
+          description: "Only return flights on this day of the week (0-6). Returns every day when omitted."
+          required: false
+          type: "integer"
+          minimum: 0
+          maximum: 6
       responses:
         "200":
           description: "Operation completed successfully"
           schema:
             $ref: "#/definitions/ListFlightResponse"
         "400":
-          description: "Invalid username/password supplied"
+          description: "Invalid query parameter"
+          schema:
+            $ref: "#/definitions/Error"
+        "404":
+          description: "Airport not found"
+          schema:
+            $ref: "#/definitions/Error"
   /flightPaths/{id}:
     put:
       tags:
@@ -384,7 +476,6 @@ paths:
           description: "ID of the flight to be replaced"
           required: true
           type: "string"
-          format: "uuid"
         - in: "body"
           name: "body"
           description: "Flight object that should be replaced"
@@ -392,12 +483,20 @@ paths:
           schema:
             $ref: "#/definitions/Route"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     patch:
       tags:
         - "flights"
@@ -414,7 +513,6 @@ paths:
           description: "ID of the flight to be replaced"
           required: true
           type: "string"
-          format: "uuid"
         - in: "body"
           name: "body"
           description: "Flight object that should be replaced"
@@ -422,12 +520,20 @@ paths:
           schema:
             $ref: "#/definitions/Route"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "400":
           description: "InvalidValidation exception"
+          schema:
+            $ref: "#/definitions/Error"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
         "500":
           description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/Error"
     get:
       tags:
         - "flights"
@@ -442,7 +548,6 @@ paths:
           description: "ID of the flight to be returned"
           required: true
           type: "string"
-          format: "uuid"
       responses:
         "200":
           description: "operation completed successfully"
@@ -450,6 +555,8 @@ paths:
             $ref: "#/definitions/Route"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
     delete:
       tags:
         - "flights"
@@ -464,10 +571,13 @@ paths:
           description: "Flight id to be deleted"
           required: true
           type: "string"
-          format: "uuid"
       responses:
+        "204":
+          description: "Operation completed successfully"
         "404":
           description: "Document not found"
+          schema:
+            $ref: "#/definitions/Error"
 definitions:
   Geolocation:
     type: "object"
@@ -490,6 +600,7 @@ definitions:
     - "airportname"
     - "city"
     - "country"
+    - "tz"
     properties:
       airportname:
         type: "string"
@@ -543,6 +654,11 @@ definitions:
             example: 5
   Hotel:
     type: "object"
+    required:
+    - "address"
+    - "city"
+    - "country"
+    - "name"
     properties:
       address:
         type: "string"
@@ -574,7 +690,7 @@ definitions:
       fax:
         type: "string"
         example: "415 441-7307"
-      free_breakfast":
+      free_breakfast:
         type: "boolean"
         example: true
       free_internet:
@@ -619,7 +735,7 @@ definitions:
         type: "string"
         example: "San Francisco/Fisherman's Wharf"
       tollfree:
-        type: "boolean"
+        type: "string"
       type:
         type: "string"
         example: "hotel"
@@ -635,7 +751,7 @@ definitions:
       day:
         type: "number"
         example: 1
-      fligth:
+      flight:
         type: "string"
         example: "AF288"
       utc:
@@ -711,3 +827,9 @@ definitions:
               type: "string"
             equipment:
               type: "string"
+  Error:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Query param \"limit\" must be an integer >= 1"

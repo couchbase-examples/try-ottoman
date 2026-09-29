@@ -40,8 +40,8 @@ jobs:
         run: yarn couchbase:start
 
       - name: Integration tests
-        run: yarn test --selectProjects integration
+        run: yarn test:integration
 
       - name: Couchbase logs
         if: failure()
-        run: docker logs try-ottoman-cb | tail -200
+        run: docker logs try-ottoman-cb 2>&1 | tail -200

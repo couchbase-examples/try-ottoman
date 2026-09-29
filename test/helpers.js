@@ -38,7 +38,8 @@ const describeCrud = (api, path, model, docs) => {
     const created = [];
 
     afterAll(async () => {
-      await Promise.all(created.map((id) => model.removeById(id).catch(() => undefined)));
+      // Remove through a loaded document (like the API does) so refdoc index entries go too.
+      await Promise.all(created.map((id) => model.findById(id).then((doc) => doc.remove()).catch(() => undefined)));
     });
 
     it('creates, reads, patches, replaces and deletes a document', async () => {

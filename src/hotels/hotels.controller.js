@@ -1,14 +1,17 @@
 const express = require('express');
 const { HotelModel } = require('./hotels.model');
 const { makeResponse } = require('../shared/make.response');
+const { parseIntParam } = require('../shared/query-params');
 const { FindOptions } = require('ottoman');
 const router = express();
 
 router.get('/', async (req, res) => {
   await makeResponse(res, async () => {
     const options = new FindOptions({
-      limit: Number(req.query.limit || 50), 
-      skip: Number(req.query.skip || 0)
+      limit: parseIntParam(req.query, 'limit', 50, { min: 1 }),
+      skip: parseIntParam(req.query, 'skip', 0),
+      // A stable order keeps limit/skip pages from overlapping.
+      sort: { name: 'ASC', id: 'ASC' },
     });
     const filter = req.query.search ? { name: { $like: `%${req.query.search}%` } } : {};
     const result = await HotelModel.find(filter, options);
@@ -47,7 +50,10 @@ router.put('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   await makeResponse(res, async () => {
-    await HotelModel.removeById(req.params.id);
+    // Load the hotel first: removeById only knows the id, so Ottoman can't find the
+    // findRefName refdoc entry to clean up and it's left behind.
+    const hotel = await HotelModel.findById(req.params.id);
+    await hotel.remove();
     res.status(204);
   });
 });

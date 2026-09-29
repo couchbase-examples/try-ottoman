@@ -4,11 +4,8 @@ const { describeCrud, setupApi, uniqueSuffix } = require('../helpers');
 
 const api = setupApi();
 
-// Every hotel created here is named `Test Hotel ...` so its refdoc index entries can be cleaned up.
-const TEST_NAME_PREFIX = 'Test Hotel';
-
 const newHotel = () => ({
-  name: `${TEST_NAME_PREFIX} ${uniqueSuffix()}`,
+  name: `Test Hotel ${uniqueSuffix()}`,
   address: '1 Test Street',
   city: 'Testville',
   country: 'United States',
@@ -17,14 +14,13 @@ const newHotel = () => ({
   free_breakfast: true,
 });
 
-describe('/hotels', () => {
-  afterAll(async () => {
-    // Ottoman's refdoc index (findRefName) leaves its lookup documents behind after a replace + delete.
-    await ottoman.query(
-      `DELETE FROM \`${ottoman.bucketName}\`.inventory.hotel WHERE META().id LIKE "$inventoryhotel$name.${TEST_NAME_PREFIX} %"`,
-    );
-  });
+// The lookup document Ottoman keeps for the findRefName refdoc index.
+const refdocExists = async (name) => {
+  const { exists } = await ottoman.getCollection('hotel', 'inventory').exists(`$inventoryhotel$name.${name}`);
+  return exists;
+};
 
+describe('/hotels', () => {
   describe('GET /hotels', () => {
     it('finds travel-sample hotels by name', async () => {
       const res = await api.get('/hotels').query({ search: 'Medway' }).expect(200);
@@ -36,12 +32,27 @@ describe('/hotels', () => {
       expect(res.body.items).toHaveLength(5);
     });
 
+    it('orders hotels by name', async () => {
+      const res = await api.get('/hotels').query({ search: 'Inn', limit: 20 }).expect(200);
+      const names = res.body.items.map((h) => h.name);
+      expect(names).toHaveLength(20);
+      expect(names).toEqual([...names].sort());
+    });
+
     it('honors skip', async () => {
-      const all = await api.get('/hotels').query({ search: 'Inn', limit: 3 }).expect(200);
+      const all = await api.get('/hotels').query({ search: 'Inn', limit: 4 }).expect(200);
       const skipped = await api.get('/hotels').query({ search: 'Inn', limit: 3, skip: 1 }).expect(200);
-      expect(all.body.items).toHaveLength(3);
-      expect(skipped.body.items).toHaveLength(3);
-      expect(skipped.body.items.map((h) => h.id)).not.toEqual(all.body.items.map((h) => h.id));
+      expect(all.body.items).toHaveLength(4);
+      expect(skipped.body.items.map((h) => h.id)).toEqual(all.body.items.slice(1).map((h) => h.id));
+    });
+
+    it.each([
+      [{ limit: 'abc' }, /"limit"/],
+      [{ limit: 0 }, /"limit"/],
+      [{ skip: -1 }, /"skip"/],
+    ])('responds 400 for %p', async (query, message) => {
+      const res = await api.get('/hotels').query(query).expect(400);
+      expect(res.body.message).toMatch(message);
     });
   });
 
@@ -69,11 +80,35 @@ describe('/hotels', () => {
     });
   });
 
+  describe('findRefName refdoc index', () => {
+    let id;
+
+    afterAll(async () => {
+      if (id) {
+        await HotelModel.findById(id).then((doc) => doc.remove()).catch(() => undefined);
+      }
+    });
+
+    it('keeps the refdoc entry in step with the hotel through replace and delete', async () => {
+      const original = newHotel();
+      ({ id } = (await api.post('/hotels').send(original).expect(201)).body);
+      expect(await refdocExists(original.name)).toBe(true);
+
+      const replacement = newHotel();
+      await api.put(`/hotels/${id}`).send(replacement).expect(204);
+      expect(await refdocExists(original.name)).toBe(false);
+      expect(await refdocExists(replacement.name)).toBe(true);
+
+      await api.delete(`/hotels/${id}`).expect(204);
+      expect(await refdocExists(replacement.name)).toBe(false);
+    });
+  });
+
   describeCrud(api, '/hotels', HotelModel, {
     create: newHotel,
     patch: { vacancy: true, price: 99 },
     replace: () => ({
-      name: `${TEST_NAME_PREFIX} replaced ${uniqueSuffix()}`,
+      name: `Test Hotel replaced ${uniqueSuffix()}`,
       address: '2 Replacement Road',
       city: 'Newtown',
       country: 'France',

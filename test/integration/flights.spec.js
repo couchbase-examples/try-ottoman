@@ -40,6 +40,26 @@ describe('/flightPaths', () => {
       expect(res.body.items).toHaveLength(2);
     });
 
+    it('honors skip', async () => {
+      const all = await api.get('/flightPaths').query({ from: SFO, to: LAX, weekDay: 1, limit: 4 }).expect(200);
+      const skipped = await api
+        .get('/flightPaths')
+        .query({ from: SFO, to: LAX, weekDay: 1, limit: 3, skip: 1 })
+        .expect(200);
+      expect(all.body.items).toHaveLength(4);
+      expect(skipped.body.items).toEqual(all.body.items.slice(1));
+    });
+
+    it('returns flights on every weekday when weekDay is omitted', async () => {
+      const res = await api.get('/flightPaths').query({ from: SFO, to: LAX, limit: 500 }).expect(200);
+      expect(new Set(res.body.items.map((item) => item.day)).size).toBeGreaterThan(1);
+    });
+
+    it.each(['7', '-1', 'monday'])('responds 400 for weekDay=%s', async (weekDay) => {
+      const res = await api.get('/flightPaths').query({ from: SFO, to: LAX, weekDay }).expect(400);
+      expect(res.body.message).toMatch(/"weekDay"/);
+    });
+
     it('responds 400 when from or to is missing', async () => {
       await api.get('/flightPaths').query({ from: SFO }).expect(400);
     });

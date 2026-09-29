@@ -60,7 +60,12 @@ sample_bucket_exists() { rest "http://localhost:8091/pools/default/buckets/$SAMP
 install_sample() {
   rest -X POST http://localhost:8091/sampleBuckets/install -d "[\"$SAMPLE\"]" || sample_bucket_exists
 }
-sample_load_finished() { ! rest http://localhost:8091/pools/default/tasks | grep -q loadingSampleBucket; }
+# Fails (so wait_for keeps polling) if the task list can't be read, rather than reporting done.
+sample_load_finished() {
+  local tasks
+  tasks=$(rest http://localhost:8091/pools/default/tasks) || return 1
+  ! grep -q loadingSampleBucket <<<"$tasks"
+}
 
 indexes_online() {
   local total pending
@@ -93,6 +98,9 @@ if sample_bucket_exists >/dev/null 2>&1; then
 else
   log "Loading $SAMPLE sample bucket"
   wait_for "sample bucket install to be accepted" install_sample
+  # Make sure the install has taken effect before checking the task list, so the check below
+  # can't pass just because the loading task hasn't shown up yet.
+  wait_for "$SAMPLE bucket to be created" sample_bucket_exists
 fi
 
 wait_for "$SAMPLE to finish loading" sample_load_finished

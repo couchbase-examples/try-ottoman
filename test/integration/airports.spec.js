@@ -24,6 +24,20 @@ describe('/airports', () => {
       const res = await api.get('/airports').query({ limit: 3 }).expect(200);
       expect(res.body.items).toHaveLength(3);
     });
+
+    it('orders airports by name and honors skip', async () => {
+      const all = await api.get('/airports').query({ search: 'Intl', limit: 4 }).expect(200);
+      const skipped = await api.get('/airports').query({ search: 'Intl', limit: 3, skip: 1 }).expect(200);
+      const names = all.body.items.map((a) => a.airportname);
+      expect(names).toHaveLength(4);
+      expect(names).toEqual([...names].sort());
+      expect(skipped.body.items.map((a) => a.id)).toEqual(all.body.items.slice(1).map((a) => a.id));
+    });
+
+    it('responds 400 for an invalid limit', async () => {
+      const res = await api.get('/airports').query({ limit: 'lots' }).expect(400);
+      expect(res.body.message).toMatch(/"limit"/);
+    });
   });
 
   describe('GET /airports/:id', () => {
