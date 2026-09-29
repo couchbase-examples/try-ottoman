@@ -4,12 +4,14 @@
   "description": "The travel-sample API using the Ottoman Js v2",
   "main": "server.js",
   "scripts": {
-    "test": "test",
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "jest --runInBand",
+    "test:unit": "jest --selectProjects unit",
+    "couchbase:start": "bash scripts/start-couchbase.sh"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/couchbaselabs/try-ottoman.git"
+    "url": "git+https://github.com/couchbase-examples/try-ottoman.git"
   },
   "keywords": [
     "OttomanJS",
@@ -17,14 +19,40 @@
   ],
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/couchbaselabs/try-ottoman/issues"
+    "url": "https://github.com/couchbase-examples/try-ottoman/issues"
   },
-  "homepage": "https://github.com/couchbaselabs/try-ottoman#readme",
+  "homepage": "https://github.com/couchbase-examples/try-ottoman#readme",
   "dependencies": {
     "dotenv": "10.0.0",
     "express": "4.17.1",
     "ottoman": "^2.0.0",
     "swagger-ui-express": "4.1.6",
     "yamljs": "0.3.0"
+  },
+  "devDependencies": {
+    "jest": "29.7.0",
+    "supertest": "7.3.0"
+  },
+  "resolutions": {
+    "node-releases": "2.0.44"
+  },
+  "jest": {
+    "testTimeout": 30000,
+    "projects": [
+      {
+        "testEnvironment": "node",
+        "displayName": "unit",
+        "testMatch": [
+          "<rootDir>/test/unit/**/*.spec.js"
+        ]
+      },
+      {
+        "testEnvironment": "node",
+        "displayName": "integration",
+        "testMatch": [
+          "<rootDir>/test/integration/**/*.spec.js"
+        ]
+      }
+    ]
   }
 }

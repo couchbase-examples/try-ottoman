@@ -1,4 +1,6 @@
 const { Schema, model } = require('ottoman');
+// Models register on the default Ottoman instance, so make sure it exists first.
+require('../../ottoman-global-config');
 
 const FlightSchema = new Schema({
   day: Number,

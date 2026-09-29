@@ -2,20 +2,27 @@ const express = require('express');
 const { RouteModel } = require('./flights.model');
 const { AirportModel } = require('../airports/airports.model');
 const { makeResponse } = require('../shared/make.response');
-const { Query, getDefaultConnection } = require('ottoman');
+const { Query, getDefaultInstance, ValidationError } = require('ottoman');
 const router = express();
 
 router.get('/', async (req, res) => {
   await makeResponse(res, async () => {
     const { limit, skip, from, to, weekDay } = req.query;
-    const fromDocument = await AirportModel.findById(from, { select: 'faa' });
-    const toDocument = await AirportModel.findById(to, { select: 'faa' });
-    const conn = getDefaultConnection();
-    const buckeName = conn.bucketName;
-    const query = new Query({}, `${buckeName} as r UNNEST r.schedule as s`)
+    if (!from || !to) {
+      throw new ValidationError('Query params "from" and "to" are required');
+    }
+    const fromDocument = await AirportModel.findById(String(from), { select: 'faa' });
+    const toDocument = await AirportModel.findById(String(to), { select: 'faa' });
+    const conn = getDefaultInstance();
+    const keyspace = `\`${conn.bucketName}\`.inventory`;
+    const where = { 'r.sourceairport': fromDocument.faa, 'r.destinationairport': toDocument.faa };
+    if (weekDay !== undefined) {
+      where['s.day'] = Number(weekDay);
+    }
+    const query = new Query({}, `${keyspace}.route as r UNNEST r.schedule as s`)
       .select('a.name, s.flight, s.utc, s.day, r.sourceairport, r.destinationairport, r.equipment')
-      .plainJoin(`JOIN \`${buckeName}\` as a on keys r.airlineid`)
-      .where({ 'r.sourceairport': fromDocument.faa, 'r.destinationairport': toDocument.faa, 's.day': Number(weekDay) })
+      .plainJoin(`JOIN ${keyspace}.airline as a ON KEYS r.airlineid`)
+      .where(where)
       .limit(Number(limit || 50))
       .offset(Number(skip || 0))
       .orderBy({ 'a.name': 'ASC' });
