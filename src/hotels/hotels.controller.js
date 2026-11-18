@@ -2,8 +2,9 @@ const express = require('express');
 const { HotelModel } = require('./hotels.model');
 const { makeResponse } = require('../shared/make.response');
 const { parseIntParam } = require('../shared/query-params');
+const { addCrudRoutes } = require('../shared/crud.routes');
 const { FindOptions } = require('ottoman');
-const router = express();
+const router = express.Router();
 
 router.get('/', async (req, res) => {
   await makeResponse(res, async () => {
@@ -23,41 +24,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.get('/:id', async (req, res) => {
-  await makeResponse(res, () => HotelModel.findById(req.params.id));
-});
-
-router.post('/', async (req, res) => {
-  await makeResponse(res, () => {
-    res.status(201);
-    const hotel = new HotelModel(req.body);
-    return hotel.save();
-  });
-});
-
-router.patch('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    res.status(204);
-    await HotelModel.updateById(req.params.id, req.body);
-  });
-});
-
-router.put('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    await HotelModel.replaceById(req.params.id, req.body);
-    res.status(204);
-  });
-});
-
-router.delete('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    // Load the hotel first: removeById only knows the id, so Ottoman can't find the
-    // findRefName refdoc entry to clean up and it's left behind.
-    const hotel = await HotelModel.findById(req.params.id);
-    await hotel.remove();
-    res.status(204);
-  });
-});
+addCrudRoutes(router, HotelModel);
 
 module.exports = {
   HotelRoutes: router

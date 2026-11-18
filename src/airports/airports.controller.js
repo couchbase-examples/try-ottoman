@@ -2,9 +2,10 @@ const express = require('express');
 const { AirportModel } = require('./airports.model');
 const { makeResponse } = require('../shared/make.response');
 const { parseIntParam } = require('../shared/query-params');
+const { addCrudRoutes } = require('../shared/crud.routes');
 const { FindOptions } = require('ottoman');
 
-const router = express();
+const router = express.Router();
 
 router.get('/', async (req, res) => {
   await makeResponse(res, async () => {
@@ -24,38 +25,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.get('/:id', async (req, res) => {
-  await makeResponse(res, () => AirportModel.findById(req.params.id));
-});
-
-router.post('/', async (req, res) => {
-  await makeResponse(res, () => {
-    res.status(201);
-    const airport = new AirportModel(req.body);
-    return airport.save();
-  });
-});
-
-router.patch('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    res.status(204);
-    await AirportModel.updateById(req.params.id, req.body);
-  });
-});
-
-router.put('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    await AirportModel.replaceById(req.params.id, req.body);
-    res.status(204);
-  });
-});
-
-router.delete('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    await AirportModel.removeById(req.params.id);
-    res.status(204);
-  });
-});
+addCrudRoutes(router, AirportModel);
 
 module.exports = {
   AirportRoutes: router

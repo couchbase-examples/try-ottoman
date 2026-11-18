@@ -3,8 +3,9 @@ const { RouteModel } = require('./flights.model');
 const { AirportModel } = require('../airports/airports.model');
 const { makeResponse } = require('../shared/make.response');
 const { parseIntParam } = require('../shared/query-params');
+const { addCrudRoutes } = require('../shared/crud.routes');
 const { Query, getDefaultInstance, ValidationError } = require('ottoman');
-const router = express();
+const router = express.Router();
 
 router.get('/', async (req, res) => {
   await makeResponse(res, async () => {
@@ -38,38 +39,7 @@ router.get('/', async (req, res) => {
   });
 });
 
-router.get('/:id', async (req, res) => {
-  await makeResponse(res, () => RouteModel.findById(req.params.id));
-});
-
-router.post('/', async (req, res) => {
-  await makeResponse(res, () => {
-    res.status(201);
-    const route = new RouteModel(req.body);
-    return route.save();
-  });
-});
-
-router.patch('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    res.status(204);
-    await RouteModel.updateById(req.params.id, req.body);
-  });
-});
-
-router.put('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    await RouteModel.replaceById(req.params.id, req.body);
-    res.status(204);
-  });
-});
-
-router.delete('/:id', async (req, res) => {
-  await makeResponse(res, async () => {
-    await RouteModel.removeById(req.params.id);
-    res.status(204);
-  });
-});
+addCrudRoutes(router, RouteModel);
 
 module.exports = {
   FlightRoutes: router
