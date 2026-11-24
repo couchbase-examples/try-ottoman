@@ -35,7 +35,8 @@
     "supertest": "7.3.0"
   },
   "resolutions": {
-    "node-releases": "2.0.44"
+    "node-releases": "2.0.44",
+    "underscore": "1.13.8"
   },
   "jest": {
     "testTimeout": 30000,
