@@ -259,7 +259,7 @@ The index like in the hotel example are.
 
 ### Application and Routing
 
-Now that the models are defined above, the application is wired together in the ```server.js``` file in the root directory and ```src/app.js```, and the routes are defined in the ```*.controller.js``` files in each module directory.
+Now that the models are defined above, the application is wired together in the ```server.js``` file in the root directory and ```src/app.js```, and the routes are defined in the ```*.controller.js``` files in each module directory. Each controller defines its own list endpoint (`GET /`) and gets the shared read, create, patch, replace and delete endpoints from `addCrudRoutes` in `src/shared/crud.routes.js`.
 
 #### App
 
